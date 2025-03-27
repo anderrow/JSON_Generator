@@ -34,6 +34,7 @@ for sheet_name, df in dfs.items():
 
     # Erase rows if there is a NaN value (Not message found)
     df_cleaned = df_filtered_subset.dropna()
+    df_cleaned = df_filtered_subset[df_filtered_subset.iloc[:, 1] != ""]
 
     # Keep the dataframe filtered
     df_filtered_dict[sheet_name] = df_cleaned

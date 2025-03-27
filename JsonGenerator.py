@@ -58,11 +58,11 @@ for sheet_name, df in df_filtered_dict.items():
     # Generate the name of the file based on the name of the excel sheet
     json_filename = os.path.join(output_folder, f"{sheet_name}.json")
 
-    # Convert the df to a dict and save it as a JSON
-    df_to_json = df.to_dict(orient='records')
+    # Convert the DataFrame to a dictionary with Column1 as the key and Column2 as the value
+    df_to_json = dict(zip(df.iloc[:, 0], df.iloc[:, 1]))
 
     with open(json_filename, 'w') as json_file:
-        json.dump(df_to_json, json_file)  # Removed indent parameter for no line breaks
+        json.dump(df_to_json, json_file)  # Saving without indent for a compact format
 
     print(f"JSON file {json_filename} has been created.")
 # --------------------------------END OF GENERATE JSON FILES--------------------------------#

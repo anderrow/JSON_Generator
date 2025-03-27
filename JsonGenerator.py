@@ -24,7 +24,7 @@ for sheet_name, df in dfs.items():
     # Convert the third column to string to avoid issues with non-string values
     df.iloc[:, 2] = df.iloc[:, 2].astype(str)
 
-    # Filter dataframe erasing rows that ends with Undefine (Case sensitive is set to false, Nan values are erased)
+    # Filter dataframe erasing rows that ends with Undefine (Case sensitive is set to false, Nan values are skipped)
     df_filtered = df[~df.iloc[:, 2].str.contains(r'.*Undefined$', case=False, na=False)]
 
     # Filter dataframe for 'Unknown message'

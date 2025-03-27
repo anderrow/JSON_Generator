@@ -1,4 +1,5 @@
 # Author: Anderrow
+# Read the README.md file for more info.
 # https://github.com/anderrow
 
 import pandas as pd
@@ -16,8 +17,6 @@ del dfs["Pointer overview"]  # Pointer Overview is not needed
 df_filtered_dict = {}  # Init
 
 for sheet_name, df in dfs.items():
-    # Save the reference for the df in the dict
-
     # Replace NaN with an empty string before converting the third column to string
     df.iloc[:, 2] = df.iloc[:, 2].fillna('')
 

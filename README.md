@@ -1,5 +1,5 @@
 # JSON_Generator
-This is a JSON generator programmed in Python. It automatically generates a Python file based on the information provided in the 'ProcessViewMessages.xlsm' Excel file.
+This is a JSON generator programmed in Python. It automatically generates a JSON file based on the information provided in the 'ProcessViewMessages.xlsm' Excel file.
 ---  
 It's much better to run this program again on the Python engine; anyway:
 If .exe is needed:

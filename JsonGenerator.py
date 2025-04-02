@@ -5,15 +5,16 @@
 import pandas as pd
 import json
 import os
+import re
 
 path = "../ProcessViewMessages.xlsm"
 # Read all sheets into a dictionary of DataFrames
 dfs = pd.read_excel(path, sheet_name=None)
 
+# --------------------------------FILTER DATAFRAMES--------------------------------#
 del dfs["ProtonView"]  # ProtonView sheet is not needed
 del dfs["Pointer overview"]  # Pointer Overview is not needed
 
-# --------------------------------FILTER DATAFRAMES--------------------------------#
 df_filtered_dict = {}  # Init
 
 for sheet_name, df in dfs.items():
@@ -30,10 +31,9 @@ for sheet_name, df in dfs.items():
     df_filtered2 = df_filtered[~df_filtered.iloc[:, 2].str.contains('Unkown message', case=False, na=False)]
 
     # Select the second column (Keys) and the third column (Messages)
-    df_filtered_subset = df_filtered2.iloc[:, [1, 2]]
+    df_filtered_subset = df_filtered2.iloc[:, 1:9]
 
     # Erase rows if there is a NaN value (Not message found)
-    df_cleaned = df_filtered_subset.dropna()
     df_cleaned = df_filtered_subset[df_filtered_subset.iloc[:, 1] != ""]
 
     # Keep the dataframe filtered
@@ -50,20 +50,27 @@ for sheet_name, df in dfs.items():
 # --------------------------------END OF FILTER DATAFRAMES--------------------------------#
 
 # --------------------------------GENERATE JSON FILES--------------------------------#
-# Create the folder in the parent directory if it doesn't exist
-output_folder = "../JSON FILES"
-os.makedirs(output_folder, exist_ok=True)
 
 # Loop to save the JSON files
 for sheet_name, df in df_filtered_dict.items():
-    # Generate the name of the file based on the name of the excel sheet
-    json_filename = os.path.join(output_folder, f"{sheet_name}.json")
+  # Create the folder in the parent directory if it doesn't exist
+  output_folder = f"../JSON FILES/{sheet_name}"
+  os.makedirs(output_folder, exist_ok=True)
+  print("*"*50)
+  #Loop to save each column of the dataframe
+  for column in range(1, df.shape[1]):
+      column_name = df.columns[column] #Keep name of the column with index column  
 
-    # Convert the DataFrame to a dictionary with Column1 as the key and Column2 as the value
-    df_to_json = dict(zip(df.iloc[:, 0], df.iloc[:, 1]))
+      column_name_simple = re.sub(r"^([a-zA-Z]+)-.*", r"\1", column_name)
 
-    with open(json_filename, 'w') as json_file:
-        json.dump(df_to_json, json_file)  # Saving without indent for a compact format
+      # Generate the name of the file based on the name of the excel sheet
+      json_filename = os.path.join(output_folder, f"{column_name_simple}.json")
 
-    print(f"JSON file {json_filename} has been created.")
+      # Convert the DataFrame to a dictionary with Column1 as the key and Column2 as the value
+      df_to_json = dict(zip(df.iloc[:, 0], df.iloc[:, column]))
+
+      with open(json_filename, 'w') as json_file:
+          json.dump(df_to_json, json_file)  # Saving without indent for a compact format
+
+      print(f"JSON file {json_filename} has been created")
 # --------------------------------END OF GENERATE JSON FILES--------------------------------#

@@ -51,6 +51,9 @@ for sheet_name, df in dfs.items():
 
 # --------------------------------GENERATE JSON FILES--------------------------------#
 
+#Define the column name pattern need it with regex for avoid extrange file names. 
+column_name_pattern = r'^[a-z]{2}-[A-Z]{2}$'
+
 # Loop to save the JSON files
 for sheet_name, df in df_filtered_dict.items():
   # Create the folder in the parent directory if it doesn't exist
@@ -58,19 +61,23 @@ for sheet_name, df in df_filtered_dict.items():
   os.makedirs(output_folder, exist_ok=True)
   print("*"*50)
   #Loop to save each column of the dataframe
-  for column in range(1, df.shape[1]):
-      column_name = df.columns[column] #Keep name of the column with index column  
+    for column in range(1, df.shape[1]):
+        column_name = df.columns[column] #Keep name of the column with index column  
 
-      column_name_simple = re.sub(r"^([a-zA-Z]+)-.*", r"\1", column_name)
+        #verify that the column complies with the defined regex pattern
+        if not re.match(column_name_pattern, column_name):
+           raise ValueError(f"The column name '{column_name}' doesn't have the requiered format [a-z][a-z]-[A-Z][A-Z]")
+           
+        column_name_simple = re.sub(r"^([a-zA-Z]+)-.*", r"\1", column_name)
 
-      # Generate the name of the file based on the name of the excel sheet
-      json_filename = os.path.join(output_folder, f"{column_name_simple}.json")
+        # Generate the name of the file based on the name of the excel sheet
+        json_filename = os.path.join(output_folder, f"{column_name_simple}.json")
 
-      # Convert the DataFrame to a dictionary with Column1 as the key and Column2 as the value
-      df_to_json = dict(zip(df.iloc[:, 0], df.iloc[:, column]))
+        # Convert the DataFrame to a dictionary with Column1 as the key and Column2 as the value
+        df_to_json = dict(zip(df.iloc[:, 0], df.iloc[:, column]))
 
-      with open(json_filename, 'w') as json_file:
-          json.dump(df_to_json, json_file)  # Saving without indent for a compact format
+        with open(json_filename, 'w') as json_file:
+            json.dump(df_to_json, json_file)  # Saving without indent for a compact format
 
-      print(f"JSON file {json_filename} has been created")
+        print(f"JSON file {json_filename} has been created")
 # --------------------------------END OF GENERATE JSON FILES--------------------------------#

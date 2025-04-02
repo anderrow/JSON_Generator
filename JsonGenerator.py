@@ -56,17 +56,18 @@ column_name_pattern = r'^[a-z]{2}-[A-Z]{2}$'
 
 # Loop to save the JSON files
 for sheet_name, df in df_filtered_dict.items():
-  # Create the folder in the parent directory if it doesn't exist
-  output_folder = f"../JSON FILES/{sheet_name}"
-  os.makedirs(output_folder, exist_ok=True)
-  print("*"*50)
-  #Loop to save each column of the dataframe
+    # Create the folder in the parent directory if it doesn't exist
+    output_folder = f"../JSON FILES/{sheet_name}"
+    os.makedirs(output_folder, exist_ok=True)
+    print("*"*50)
+    
+    #Loop to save each column of the dataframe
     for column in range(1, df.shape[1]):
         column_name = df.columns[column] #Keep name of the column with index column  
 
         #verify that the column complies with the defined regex pattern
         if not re.match(column_name_pattern, column_name):
-           raise ValueError(f"The column name '{column_name}' doesn't have the requiered format [a-z][a-z]-[A-Z][A-Z]")
+           raise ValueError(f"\n The column name '{column_name}' doesn't have the requiered format [a-z][a-z]-[A-Z][A-Z]")
            
         column_name_simple = re.sub(r"^([a-zA-Z]+)-.*", r"\1", column_name)
 

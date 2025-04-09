@@ -49,10 +49,25 @@ for sheet_name, df in dfs.items():
 
 # --------------------------------END OF FILTER DATAFRAMES--------------------------------#
 
-# --------------------------------GENERATE JSON FILES--------------------------------#
+#------------------------------VERIFIY IF THE COLUMNS ARE CORECT---------------------------#
 
+
+#---------------------------END OF VERIFIY IF THE COLUMNS ARE CORECT-----------------------#
 #Define the column name pattern need it with regex for avoid extrange file names. 
 column_name_pattern = r'^[a-z]{2}-[A-Z]{2}$'
+
+for sheet_name, df in df_filtered_dict.items():
+    for column in range(1, df.shape[1]):
+        column_name = df.columns[column] #Keep name of the column with index column  
+
+        #verify that the column complies with the defined regex pattern
+        if not re.match(column_name_pattern, column_name):
+           raise ValueError(f"\n The column name '{column_name}' doesn't have the requiered format [a-z][a-z]-[A-Z][A-Z]")
+
+#---------------------------------GENERATE JSON FILES--------------------------------#
+
+
+
 
 # Loop to save the JSON files
 for sheet_name, df in df_filtered_dict.items():

@@ -1,35 +1,60 @@
-# JSON_Generator
-This is a JSON generator programmed in Python. It automatically generates a Python file based on the information provided in the 'ProcessViewMessages.xlsm' Excel file.
----  
-It's much better to run this program again on the Python engine; anyway:
-If .exe is needed:
-  To convert the .py file into a .exe file, run the following command in your Windows terminal:
-  
-  JSON Generator> pyinstaller --onefile --windowed jsonGenerator.py
-  
-  The pyinstaller library is required. If you don’t have it installed, you can install it using the following command:
-  
-  pip install pyinstaller
-  
-  BE CAREFUL: Due to the fact that the Python files work with pandas and json dependencies, this process can take a lot of time (from 5 to 20 minutes)
+# JSON Generator
 
-Graphical illustration of how the tree should look like: (It's not a problem if more files or folders are present; these are the minimum requirements).
+A Python utility that converts ProcessViewMessages Excel data into JSON files.
 
-PROCCESVIEW MESSAGES
-|   ProcessViewMessages.xlsm
-|
-\---JSON Generator
-    |   JsonGenerator.py
+## Overview
 
-After running the program, the tree should look like this:
+This tool automatically processes the `ProcessViewMessages.xlsm` Excel file and generates corresponding JSON files for each sheet, organizing the output by category (AVA, UFA, VILOFOSS).
 
-PROCCESVIEW MESSAGES
-|   ProcessViewMessages.xlsm
-|
-+---JSON FILES
-|       AVA.json
-|       UFA.json
-|       VILOFOSS.json
-|
-\---JSON Generator
-        JsonGenerator.py
+## Requirements
+
+- Python 3.x
+- `ProcessViewMessages.xlsm` file in the parent directory
+
+## Project Structure
+
+Required file structure:
+```
+PROCESSVIEW MESSAGES/
+├── ProcessViewMessages.xlsm
+├── JSON Generator/
+│   ├── JsonGenerator.py
+│   ├── requirements.txt
+│   └── run_env.py
+└── JSON FILES/         (generated)
+    ├── AVA.json
+    ├── UFA.json
+    └── VILOFOSS.json
+```
+
+## Usage
+
+1. Ensure `ProcessViewMessages.xlsm` is in the correct location
+2. Run the generator:
+   ```bash
+   python JsonGenerator.py
+   ```
+
+## Creating an Executable (Optional)
+
+If you need an executable version:
+
+1. Install pyinstaller:
+   ```bash
+   pip install pyinstaller
+   ```
+
+2. Create the executable:
+   ```bash
+   pyinstaller --onefile --windowed JsonGenerator.py
+   ```
+
+   **Note**: The executable creation process may take 5-20 minutes due to pandas and JSON dependencies.
+
+## Dependencies
+
+Main dependencies:
+- pandas
+- openpyxl
+
+See `requirements.txt` for the complete list.

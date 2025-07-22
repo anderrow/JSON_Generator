@@ -54,7 +54,7 @@ If you need an executable version:
 ## Dependencies
 
 Main dependencies:
-- pandas
+- polars
 - openpyxl
 
 See `requirements.txt` for the complete list.

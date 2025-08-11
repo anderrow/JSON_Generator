@@ -49,7 +49,7 @@ If you need an executable version:
    pyinstaller --onefile --windowed JsonGenerator.py
    ```
 
-   **Note**: The executable creation process may take 5-20 minutes due to pandas and JSON dependencies.
+   **Note**: The executable creation process may take 5-20 minutes due to dependencies.
 
 ## Dependencies
 

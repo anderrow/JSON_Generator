@@ -12,36 +12,29 @@ start_time = time.perf_counter()
 # Path to the Excel file
 path = "../ProcessViewMessages.xlsm"
 
-# Load workbook using openpyxl
-wb = openpyxl.load_workbook(path, read_only=True, data_only=True)  # Load all the sheets
-sheet_names = wb.sheetnames  # Extract the sheet names
 
-dfs = {}  # Initialize an empty dict for the DataFrames
+# Get the sheet names, filtering out the ones you don't want
+wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
+sheet_names = [s for s in wb.sheetnames if s not in ["ProtonView", "Pointer overview"]]
+wb.close()
 
-#Remove unnecesary sheets before the loop
-sheet_names = [s for s in sheet_names if s not in ["ProtonView", "Pointer overview"]]
+dfs = {}
 
 for sheet in sheet_names:
-    ws = wb[sheet]
-    data = list(ws.values)
-
-    # Skip sheet if empty or headers are invalid
-    if not data or data[0] is None or any(cell is None for cell in data[0]):
-        print(f"⚠️ Sheet '{sheet}' has invalid or missing headers, skipping...")
-        continue  # Skip this iteration
-
-    headers = data[0]  # Save first row as headers
-    rows = data[1:]  # Save the rest of the rows as data
-
     try:
-        df = pl.DataFrame(rows, schema=headers, orient="row")
+        # Read each sheet individually using Polars
+        df = pl.read_excel(path, sheet_name=sheet)
+        
+        # Check if the sheet is empty or headers are invalid (None)
+        if df.height == 0 or df.columns is None or any(col is None for col in df.columns):
+            print(f"⚠️ Sheet '{sheet}' has invalid or missing headers, skipping...")
+            continue
+        
+        # Store the DataFrame in the dictionary using the sheet name as key
+        dfs[sheet] = df
     except Exception as e:
         print(f"⚠️ Error processing sheet '{sheet}': {e}")
-        continue  # Skip this iteration
 
-    dfs[sheet] = df  # Save each df in the dictionary dfs
-
-wb.close()
 
 # ---------------------------- FILTER DATAFRAMES ---------------------------- #
 

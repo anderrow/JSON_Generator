@@ -30,6 +30,8 @@ for path in excel_files:
         
         # Store the DataFrame in the dictionary using the sheet name as key
         dfs[sheet_name] = df
+        
+        print(f"🔍 File '{sheet_name}' read successfully with {df.height} rows and {df.width} columns.")
     except Exception as e:
         print(f"⚠️ Error processing sheet '{sheet_name}': {e}")
 

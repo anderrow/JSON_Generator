@@ -4,36 +4,34 @@
 
 import time
 import polars as pl
-import openpyxl
-import json, os, re
+import json, os, re , glob
 
 start_time = time.perf_counter()
 
 # Path to the Excel file
-path = "../ProcessViewMessages.xlsm"
-
-
-# Get the sheet names, filtering out the ones you don't want
-wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
-sheet_names = [s for s in wb.sheetnames if s not in ["ProtonView", "Pointer overview"]]
-wb.close()
-
+source_folder = "../SOURCE FILES/"
+excel_files = glob.glob(os.path.join(source_folder, "*.xlsm")) #All .xlsm files in the SOURCE FILES folder
 dfs = {}
 
-for sheet in sheet_names:
+
+# -------------------------- READ ALL EXCEL FILES -------------------------- #
+for path in excel_files:
+    # Use the filename (without extension) as the "sheet name"
+    sheet_name = os.path.splitext(os.path.basename(path))[0]
+    
     try:
-        # Read each sheet individually using Polars
-        df = pl.read_excel(path, sheet_name=sheet)
+        #Read each sheet individually using Polars
+        df = pl.read_excel(path)
         
         # Check if the sheet is empty or headers are invalid (None)
         if df.height == 0 or df.columns is None or any(col is None for col in df.columns):
-            print(f"⚠️ Sheet '{sheet}' has invalid or missing headers, skipping...")
+            print(f"⚠️ File '{sheet_name}' has invalid or missing headers, skipping...")
             continue
         
         # Store the DataFrame in the dictionary using the sheet name as key
-        dfs[sheet] = df
+        dfs[sheet_name] = df
     except Exception as e:
-        print(f"⚠️ Error processing sheet '{sheet}': {e}")
+        print(f"⚠️ Error processing sheet '{sheet_name}': {e}")
 
 
 # ---------------------------- FILTER DATAFRAMES ---------------------------- #
@@ -82,7 +80,7 @@ for sheet_name, df in dfs.items():
 column_name_pattern = r'^[a-z]{2}-[A-Z]{2}$'
 
 for sheet_name, df in df_filtered_dict.items():
-    for i in range(1, df.shape[1]):  # shape returns a tuple with dimensions: [0] = number of rows, [1] = number of columns
+    for i in range(1, df.shape[1]):  # iterate over columns except the first one. Shape returns a tuple with dimensions: [0] = number of rows, [1] = number of columns
         column_name = df.columns[i]
         if not re.match(column_name_pattern, column_name):
             raise ValueError(
@@ -92,7 +90,6 @@ for sheet_name, df in df_filtered_dict.items():
 #---------------------------END OF VALIDATE COLUMN NAMES -----------------------#
 
 # --------------------------- GENERATE JSON FILES --------------------------- #
-
 for sheet_name, df in df_filtered_dict.items():
     output_folder = f"../JSON FILES/{sheet_name}"
     os.makedirs(output_folder, exist_ok=True)

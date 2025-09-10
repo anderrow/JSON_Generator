@@ -10,7 +10,7 @@ start_time = time.perf_counter()
 
 # Path to the Excel file
 source_folder = "../SOURCE FILES/"
-excel_files = glob.glob(os.path.join(source_folder, "*.xlsm")) #All .xlsm files in the SOURCE FILES folder
+excel_files = glob.glob(os.path.join(source_folder, "*.csv")) #All .csv files in the SOURCE FILES folder
 dfs = {}
 
 
@@ -21,7 +21,7 @@ for path in excel_files:
     
     try:
         #Read each sheet individually using Polars
-        df = pl.read_excel(path)
+        df = pl.read_csv(path)
         
         # Check if the sheet is empty or headers are invalid (None)
         if df.height == 0 or df.columns is None or any(col is None for col in df.columns):
@@ -35,7 +35,7 @@ for path in excel_files:
     except Exception as e:
         print(f"⚠️ Error processing sheet '{sheet_name}': {e}")
 
-
+print(f"current time {time.perf_counter() - start_time:.2f} seconds")
 # ---------------------------- FILTER DATAFRAMES ---------------------------- #
 
 # Initialize an empty dict for filtered DataFrames

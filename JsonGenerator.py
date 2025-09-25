@@ -86,7 +86,7 @@ for sheet_name, df in df_filtered_dict.items():
         column_name = df.columns[i]
         if not re.match(column_name_pattern, column_name):
             raise ValueError(
-                f"\n❌ Column name '{column_name}' does not match format [a-z][a-z]-[A-Z][A-Z]"
+                f"\n❌ Column name '{column_name}' of {sheet_name} does not match format [a-z][a-z]-[A-Z][A-Z]"
             )
 
 #---------------------------END OF VALIDATE COLUMN NAMES -----------------------#

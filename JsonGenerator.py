@@ -48,9 +48,9 @@ for sheet_name, df in dfs.items():
         pl.col(df.columns[2]).fill_null("").cast(pl.Utf8)
     )
 
-    # Filter out rows ending with "Undefined" (case-insensitive)
+    # Filter out rows containing "Undefined" (case-insensitive)
     df_filtered = df.filter(
-        ~pl.col(df.columns[2]).str.contains(r"(?i).*Undefined$")
+        ~pl.col(df.columns[2]).str.contains(r"(?i).*Undefined")
     )
 
     # Filter out rows containing 'Unkown message' (yes, typo included)

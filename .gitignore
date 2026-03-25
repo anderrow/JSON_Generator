@@ -1,1 +1,5 @@
 venv/
+.codex_tmp/
+__pycache__/
+*.py[cod]
+AllProjects_probe.xlsx

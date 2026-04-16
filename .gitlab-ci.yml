@@ -1,0 +1,32 @@
+image: python:3.11-slim
+
+stages:
+  - sync
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PYTHONUNBUFFERED: "1"
+  PROCESSVIEW_REPO_URL: "https://gitlab.com/mes-tools/processview.git"
+  PROCESSVIEW_TARGET_BRANCH: "develop_ibo"
+  SOURCE_REPO_SUBDIR: "SOURCE FILES"
+  GENERATED_JSON_DIR: "$CI_PROJECT_DIR/generated-json"
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+
+sync-processview:
+  stage: sync
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends git ca-certificates
+    - rm -rf /var/lib/apt/lists/*
+    - pip install -r requirements.txt
+  script:
+    - bash ci/gitlab_sync_processview.sh
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_COMMIT_BRANCH

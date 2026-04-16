@@ -92,6 +92,120 @@ Windows shortcut:
 GenerateStrings.bat
 ```
 
+## Sync To ProcessView
+
+This repository also includes a deployment helper that can:
+
+- run `JsonGenerator.py`
+- find the active CSV exports in `../SOURCE FILES/`
+- map each project code to the correct `processview` translation folder
+- run `git pull --ff-only` in the `processview` repo
+- copy the generated JSON files into the destination folder
+- optionally run `git add`, `git commit`, and `git push`
+
+Current project mapping:
+
+- `AVA` -> `hmi/translations/ava`
+- `CAR` -> `hmi/translations/crevin`
+- `DSM` -> `hmi/translations/dsm`
+- `UFA` -> `hmi/translations/ufa`
+- `VILO` -> `hmi/translations/vilo`
+
+The script expects the source CSV names to follow one of these patterns:
+
+- `PROJECTNAME_VERSION.csv`
+- `PROJECTNAME.csv`
+
+Examples:
+
+- `AVA_V7.csv`
+- `UFA.csv`
+
+Run a preview without changing anything:
+
+```bash
+python run_processview_sync.py --dry-run
+```
+
+Run the full sync using the default detected `processview` clone:
+
+```bash
+python run_processview_sync.py
+```
+
+Run the full sync and push the translation update:
+
+```bash
+python run_processview_sync.py --push
+```
+
+If the `processview` repo is in a custom location, pass it explicitly or set an environment variable:
+
+```bash
+python run_processview_sync.py --processview-repo "C:\Users\Ander\Documents\GitHub\processview"
+```
+
+```powershell
+$env:PROCESSVIEW_REPO="C:\Users\Ander\Documents\GitHub\processview"
+python run_processview_sync.py --push
+```
+
+Useful flags:
+
+- `--project AVA` sync only one project
+- `--skip-generate` reuse the current JSON files
+- `--skip-pull` skip `git pull --ff-only`
+- `--allow-dirty` allow copying into a repo with local changes when `--skip-pull` is used
+- `--prune` delete supported language files in `processview` that are missing from the generated folder
+- `--commit-message "..."` override the automatic commit message
+
+Safety checks:
+
+- If more than one CSV exists for the same project, the sync stops to avoid ambiguity.
+- If the `processview` repo has local changes, pull is blocked.
+- Only the mapped translation folders are staged and committed.
+- If a supported language file is missing in the generated folder, the sync uses `en.json` as a fallback for that language.
+- By default the sync only overwrites supported ProcessView language files (`bg`, `da`, `de`, `en`, `fr`, `nl`, `uk`) and leaves missing target files untouched unless `--prune` is used.
+
+## GitLab Automation
+
+Yes, this can run without depending on anyone's PC, but the CSV inputs must be reachable by GitLab CI.
+
+Recommended setup:
+
+1. Put the source CSV files in a Git repo that the pipeline can read.
+2. Run the generator and sync in GitLab CI.
+3. Let the pipeline push the updated translation JSON into `processview`.
+
+Important limitation:
+
+- The current local folder `../SOURCE FILES/` is outside this git repository, so GitLab cannot see it unless you move those CSV files into a repo or clone a separate source repo in CI.
+- A separate repo for generated JSON is usually not needed. The important repo is the one that stores the source CSV files.
+
+This repository now includes a ready-to-adapt GitLab pipeline template in [`.gitlab-ci.yml`](C:\Users\Ander\Nextcloud\Amabox share folder\_Proccesview\JSON_Generator\.gitlab-ci.yml) and [ci/gitlab_sync_processview.sh](C:\Users\Ander\Nextcloud\Amabox share folder\_Proccesview\JSON_Generator\ci\gitlab_sync_processview.sh).
+
+The pipeline supports two modes:
+
+- If the CSV files are committed inside the same GitLab repo under `SOURCE FILES/`, it uses them directly.
+- If the CSV files live in another GitLab repo, set `SOURCE_REPO_URL` and optionally `SOURCE_REPO_REF` and `SOURCE_REPO_SUBDIR`, and the pipeline clones that repo before generating JSON.
+
+GitLab CI variables you need:
+
+- `PROCESSVIEW_WRITE_TOKEN`: required, token with write access to `mes-tools/processview`
+- `PROCESSVIEW_REPO_URL`: optional, defaults to `https://gitlab.com/mes-tools/processview.git`
+- `PROCESSVIEW_TARGET_BRANCH`: optional, defaults to `develop_ibo`
+- `GIT_BOT_NAME`: optional commit author name
+- `GIT_BOT_EMAIL`: optional commit author email
+- `SOURCE_REPO_URL`: optional if the CSV files are in another repo
+- `SOURCE_REPO_TOKEN`: optional read token for the source repo when `CI_JOB_TOKEN` is not enough
+- `SOURCE_REPO_REF`: optional branch or tag for the source repo
+- `SOURCE_REPO_SUBDIR`: optional path inside the source repo, defaults to `SOURCE FILES`
+
+The generator now also accepts these environment variables, which is what makes CI portable:
+
+- `JSON_GENERATOR_SOURCE_DIR`
+- `JSON_GENERATOR_OUTPUT_DIR`
+
 ## Virtual Environment
 
 `run_env.py` creates and uses a virtual environment outside the repository folder:

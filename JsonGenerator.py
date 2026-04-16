@@ -7,14 +7,21 @@ import json
 import os
 import re
 import time
+from pathlib import Path
 
 import polars as pl
 
 start_time = time.perf_counter()
 
-# Path to the CSV files
-source_folder = "../SOURCE FILES/"
-excel_files = glob.glob(os.path.join(source_folder, "*.csv"))
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = SCRIPT_DIR.parent
+source_folder = Path(
+    os.environ.get("JSON_GENERATOR_SOURCE_DIR", ROOT_DIR / "SOURCE FILES")
+).resolve()
+json_root = Path(
+    os.environ.get("JSON_GENERATOR_OUTPUT_DIR", ROOT_DIR / "JSON FILES")
+).resolve()
+excel_files = glob.glob(os.path.join(str(source_folder), "*.csv"))
 dfs = {}
 
 
@@ -97,7 +104,7 @@ for sheet_name, df in df_filtered_dict.items():
 
 # --------------------------- GENERATE JSON FILES --------------------------- #
 for sheet_name, df in df_filtered_dict.items():
-    output_folder = f"../JSON FILES/{sheet_name}"
+    output_folder = json_root / sheet_name
     os.makedirs(output_folder, exist_ok=True)
 
     export_columns = export_columns_by_sheet.get(sheet_name, [])
@@ -112,7 +119,7 @@ for sheet_name, df in df_filtered_dict.items():
 
     for column_name in export_columns:
         column_name_simple = re.sub(r"^([a-zA-Z]+)-.*", r"\1", column_name)
-        json_filename = os.path.join(output_folder, f"{column_name_simple}.json")
+        json_filename = output_folder / f"{column_name_simple}.json"
 
         values = df.select(column_name).to_series().to_list()
         df_to_json = dict(zip(keys, values))
@@ -121,7 +128,7 @@ for sheet_name, df in df_filtered_dict.items():
             json.dump(df_to_json, json_file)
 
         last_json_filename = json_filename
-        print(f"JSON file created: {json_filename.replace(os.sep, '/')}")
+        print(f"JSON file created: {json_filename.as_posix()}")
 
     if last_json_filename is not None:
         print(f"Completed: {sheet_name}")
